@@ -1,7 +1,5 @@
 /* eslint-disable no-magic-numbers */
-const compare = require('../utility/compare')
-const entries = require('../utility/entries')
-const mSet = require('../utility/mSet')
+const { compare, entries, mSet } = require('utility')
 
 // eslint-disable-next-line max-len
 const URL_RGX = /^(?:([^:]+:)\/\/)?(?:([^:]+):([^@]+)@)?([^:/?#]+)?(?::([^/?#]+))?(\/[^?#]*)?(\?[^#]*)?(#.*)?$/

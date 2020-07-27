@@ -1,6 +1,9 @@
 {
   "name": "url",
   "version": "0.3.0",
+  "dependencies": {
+    "utility": "github:RobinBlomberg/utility#release/0.3.0"
+  },
   "devDependencies": {
     "test": "github:RobinBlomberg/test#release/0.3.0"
   }
