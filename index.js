@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-const { compare, entries, mSet } = require('utility')
+const { compare, entries, mSet } = require('@kjou/utility')
 
 // eslint-disable-next-line max-len
 const URL_RGX = /^(?:([^:]+:)\/\/)?(?:([^:]+):([^@]+)@)?([^:/?#]+)?(?::([^/?#]+))?(\/[^?#]*)?(\?[^#]*)?(#.*)?$/

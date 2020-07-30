@@ -1,5 +1,5 @@
 const Url = require('..')
-const { deepEqual, describe, it } = require('test')
+const { deepEqual, describe, it } = require('@kjou/test')
 
 describe('parse', () => {
   it('should parse correctly', () => {
