@@ -1,6 +1,6 @@
 {
   "name": "@robinblomberg/url",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "author": "Robin Blomberg",
   "type": "module",
   "main": "index.js",
