@@ -5,6 +5,14 @@ const SPLIT_PATH_REGEXP = /^\/?(.*?)\/?$/;
  */
 export class Url {
   /**
+   * @param {string} path
+   * @return {string}
+   */
+  static normalizePath(path) {
+    return '/' + this.splitPath(path).join('/');
+  }
+
+  /**
    * Splits an URL path into its respective directories.
    *
    * @param {string} path
