@@ -116,7 +116,7 @@ describe('Url.stringifyQuery', () => {
         // eslint-disable-next-line sort-keys
         foo: 'Hello world!'
       }),
-      '?foo=Hello%20world!&zzz=34'
+      'foo=Hello%20world!&zzz=34'
     );
   });
 });

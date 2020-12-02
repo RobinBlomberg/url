@@ -130,7 +130,11 @@ export class Url {
     }
 
     if (!search) {
-      search = this.stringifyQuery(searchParams);
+      const query = this.stringifyQuery(searchParams);
+
+      if (query) {
+        search = '?' + query;
+      }
     }
 
     let scheme = protocol
@@ -175,7 +179,7 @@ export class Url {
       return 0;
     });
 
-    let output = '?';
+    let output = '';
 
     for (let i = 0; i < pairs.length; i++) {
       if (i >= 1) {
