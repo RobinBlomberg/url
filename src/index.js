@@ -1,6 +1,6 @@
 /**
- * @typedef {import('../types').UrlSchema} UrlSchema
- * @typedef {import('../types').Query} Query
+ * @typedef {import('./types').UrlSchema} UrlSchema
+ * @typedef {import('./types').Query} Query
  */
 
 const SPLIT_PATH_REGEXP = /^\/?(.*?)\/?$/;

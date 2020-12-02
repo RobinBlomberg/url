@@ -1,12 +1,3 @@
-export class Url {
-  static normalizePath(path: string): string;
-  static parse(url: string): UrlSchema;
-  static parseQuery(query: string): Record<string, string>
-  static splitPath(path: string): string[];
-  static stringify(options: Partial<UrlSchema>): string;
-  static stringifyQuery(query?: Query): string;
-}
-
 /**
  * Models the built-in URL object.
  */

@@ -1,10 +1,9 @@
 {
   "name": "@robinblomberg/url",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "author": "Robin Blomberg",
   "type": "module",
   "main": "index.js",
-  "types": "types.d.ts",
   "devDependencies": {
     "@robinblomberg/eslint-config-robinblomberg": "^0.2.13",
     "@robinblomberg/test": "^0.5.2",
@@ -15,7 +14,7 @@
     "lint-staged": "^10.5.2"
   },
   "scripts": {
-    "check": "tsc",
+    "compile": "tsc",
     "dev": "nodemon --watch . --exec \"concurrently \\\"node ./index.test.js\\\" tsc\"",
     "lint": "eslint \"**/*.{js,ts}\"",
     "lint:fix": "eslint \"**/*.{js,ts}\" --fix",
@@ -24,7 +23,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run check && npm run test && lint-staged"
+      "pre-commit": "npm run compile && npm run test && lint-staged"
     }
   },
   "lint-staged": {
