@@ -1,10 +1,10 @@
 {
   "name": "@robinblomberg/url",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "author": "Robin Blomberg",
   "type": "module",
   "main": "index.js",
-  "types": "main.d.ts",
+  "types": "dist/index.d.ts",
   "devDependencies": {
     "@robinblomberg/eslint-config-robinblomberg": "^0.2.13",
     "@robinblomberg/test": "^0.5.2",

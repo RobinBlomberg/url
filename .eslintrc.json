@@ -1,6 +1,6 @@
 {
   "extends": "@robinblomberg/robinblomberg",
   "ignorePatterns": [
-    "main.d.ts"
+    "dist"
   ]
 }
