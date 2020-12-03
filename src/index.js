@@ -282,10 +282,12 @@ export class Url {
     const userinfo = username
       ? username + (password ? `:${password}` : '') + '@'
       : '';
-    const hashString = hash
-      ? '#' + hash
-      : '';
-    return scheme + userinfo + host + pathname + search + hashString;
+
+    if (hash && hash[0] !== '#') {
+      hash = '#' + hash;
+    }
+
+    return scheme + userinfo + host + pathname + search + hash;
   }
 
   /**
