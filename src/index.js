@@ -20,6 +20,10 @@ export class Url {
    * @return {string}
    */
   static join(...urls) {
+    if (urls.length === 0) {
+      return '/';
+    }
+
     let {
       hash,
       hostname,
@@ -205,7 +209,7 @@ export class Url {
    * Url.split('http://localhost:3000/test/index.php?id=36&a=b#top');
    * // ['http://localhost:3000', 'test', 'index.php']
    */
-  static split(url) {
+  static split(url = '') {
     const { protocol } = this.parse(url);
 
     if (protocol) {
