@@ -204,6 +204,29 @@ describe('Url.split', () => {
   );
 });
 
+describe('Url.join', () => {
+  equal(
+    Url.join('/foo//bar/index.php/', '/api/User/[userId]/'),
+    '/foo//bar/index.php/api/User/[userId]'
+  );
+  equal(
+    Url.join('http://test.com/foo//bar/index.php/', '/api/User/[userId]/'),
+    'http://test.com/foo//bar/index.php/api/User/[userId]'
+  );
+  equal(
+    Url.join('/foo//bar/index.php/', 'http://api/User/[userId]/'),
+    '/foo//bar/index.php/User/[userId]'
+  );
+  equal(
+    Url.join(
+      'http://a:b@localhost:3000/test/index.php?id=36&a=b#top',
+      'https://nodejs.org/api/http.html/#http_http_request_url_options_callback',
+      '/foo//bar/index.php/?foo=bar'
+    ),
+    'http://a:b@localhost:3000/test/index.php/api/http.html/foo//bar/index.php?foo=bar'
+  );
+});
+
 /**
  * @see https://en.wikipedia.org/wiki/URI_normalization#Normalizations_that_preserve_semantics
  * @see https://tools.ietf.org/html/rfc3986

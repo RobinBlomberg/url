@@ -3,6 +3,11 @@
  */
 export class Url {
     /**
+     * @param {...string} urls
+     * @return {string}
+     */
+    static join(...urls: string[]): string;
+    /**
      * @param {string} url
      * @return {string}
      * @see https://en.wikipedia.org/wiki/URI_normalization#Normalizations_that_preserve_semantics
@@ -22,9 +27,9 @@ export class Url {
         [x: string]: string;
     };
     /**
-     * Splits an URL path into its respective directories.
+     * Splits an URL into its respective directories.
      *
-     * @param {string} path
+     * @param {string} url
      * @return {string[]}
      * @example
      * Url.split('/foo//bar/index.php/');
@@ -33,7 +38,7 @@ export class Url {
      * Url.split('http://localhost:3000/test/index.php?id=36&a=b#top');
      * // ['http://localhost:3000', 'test', 'index.php']
      */
-    static split(path: string): string[];
+    static split(url: string): string[];
     /**
      * @param {Partial<UrlSchema>} [options]
      * @return {string}

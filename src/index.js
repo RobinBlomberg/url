@@ -16,6 +16,49 @@ const URL_REGEXP = /^(?:([^:]*:)\/\/)?(?:([^:]*)(?::([^@]*))?@)?([^:/?#]*)?(?::(
  */
 export class Url {
   /**
+   * @param {...string} urls
+   * @return {string}
+   */
+  static join(...urls) {
+    let {
+      hash,
+      hostname,
+      password,
+      pathname,
+      port,
+      protocol,
+      search,
+      username
+    } = this.parse(urls[0]);
+
+    const pathnameTokens = this.split(pathname);
+
+    for (let i = 1; i < urls.length; i++) {
+      const currParsedUrl = this.parse(urls[i]);
+      const currPathname = currParsedUrl.pathname;
+      const currPathnameTokens = this.split(currPathname);
+
+      pathnameTokens.push(...currPathnameTokens);
+
+      hash = currParsedUrl.hash;
+      search = currParsedUrl.search;
+    }
+
+    pathname = pathnameTokens.join('/');
+
+    return this.stringify({
+      hash,
+      hostname,
+      password,
+      pathname,
+      port,
+      protocol,
+      search,
+      username
+    });
+  }
+
+  /**
    * @param {string} url
    * @return {string}
    * @see https://en.wikipedia.org/wiki/URI_normalization#Normalizations_that_preserve_semantics
@@ -105,11 +148,11 @@ export class Url {
     const pathname = match[6] || '/';
     const search = match[7] || '';
     const hash = match[8] || '';
-    const host = `${hostname}${port ? `:${port}` : ''}`;
+    const host = hostname + (port ? `:${port}` : '');
     const scheme = protocol ? `${protocol}//` : '';
-    const origin = `${scheme}${host}`;
+    const origin = scheme + host;
     const userinfo = username ? `${username}${password ? `:${password}` : ''}@` : '';
-    const href = `${scheme}${userinfo}${host}${pathname}${search}${hash}`;
+    const href = scheme + userinfo + host + pathname + search + hash;
     const searchParams = this.parseQuery(search);
 
     return {
@@ -151,9 +194,9 @@ export class Url {
   }
 
   /**
-   * Splits an URL path into its respective directories.
+   * Splits an URL into its respective directories.
    *
-   * @param {string} path
+   * @param {string} url
    * @return {string[]}
    * @example
    * Url.split('/foo//bar/index.php/');
@@ -162,24 +205,16 @@ export class Url {
    * Url.split('http://localhost:3000/test/index.php?id=36&a=b#top');
    * // ['http://localhost:3000', 'test', 'index.php']
    */
-  static split(path) {
-    const tokens = [];
-    const { hash, origin, pathname, search } = this.parse(path);
+  static split(url) {
+    const { protocol } = this.parse(url);
 
-    if (origin) {
-      tokens.push(origin);
+    if (protocol) {
+      const tokens = url.slice(protocol.length + 2).split('/');
+      tokens[0] = protocol + '//' + tokens[0];
+      return tokens;
     }
 
-    if (pathname) {
-      const match = (pathname + search + hash).match(SPLIT_PATH_REGEXP);
-      const tailTokens = match?.[1].split('/');
-
-      if (tailTokens) {
-        tokens.push(...tailTokens);
-      }
-    }
-
-    return tokens;
+    return url.match(SPLIT_PATH_REGEXP)?.[1].split('/') ?? [];
   }
 
   /**
@@ -213,7 +248,7 @@ export class Url {
     }
 
     if (!host.includes(':') && port) {
-      host += `:${port}`;
+      host += ':' + port;
     }
 
     if (!pathname.startsWith('/')) {
@@ -229,24 +264,24 @@ export class Url {
     }
 
     let scheme = protocol
-      ? `${protocol}//`
+      ? protocol + '//'
       : '';
 
     if (!scheme && !host && origin) {
       const tokens = origin.split('//');
       scheme = tokens[0]
-        ? `${tokens[0]}//`
+        ? tokens[0] + '//'
         : '';
       host = tokens[1] || '';
     }
 
     const userinfo = username
-      ? `${username}${password ? `:${password}` : ''}@`
+      ? username + (password ? `:${password}` : '') + '@'
       : '';
     const hashString = hash
-      ? `#${hash}`
+      ? '#' + hash
       : '';
-    return `${scheme}${userinfo}${host}${pathname}${search}${hashString}`;
+    return scheme + userinfo + host + pathname + search + hashString;
   }
 
   /**
