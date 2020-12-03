@@ -1,8 +1,118 @@
 import { describe, equal, it } from '@robinblomberg/test';
 import { Url } from './src/index.js';
 
+describe('Url.parseQuery', () => {
+  it('should skip a leading question mark', () => {
+    equal(
+      Url.parseQuery('?id=36&a=b'),
+      {
+        a: 'b',
+        id: '36'
+      }
+    );
+    equal(
+      Url.parseQuery('id=36&a=b'),
+      {
+        a: 'b',
+        id: '36'
+      }
+    );
+  });
+});
+
 describe('Url.parse', () => {
-  it('should parse correctly', () => {
+  it('should handle empty URLs', () => {
+    equal(
+      Url.parse(''),
+      {
+        hash: '',
+        host: '',
+        hostname: '',
+        href: '/',
+        origin: '',
+        password: '',
+        pathname: '/',
+        port: '',
+        protocol: '',
+        search: '',
+        searchParams: {},
+        username: ''
+      }
+    );
+    equal(
+      Url.parse('/?'),
+      {
+        hash: '',
+        host: '',
+        hostname: '',
+        href: '/?',
+        origin: '',
+        password: '',
+        pathname: '/',
+        port: '',
+        protocol: '',
+        search: '?',
+        searchParams: {},
+        username: ''
+      }
+    );
+  });
+
+  it('should handle partial URLs', () => {
+    equal(
+      Url.parse('/foo/bar/index.php#top'),
+      {
+        hash: '#top',
+        host: '',
+        hostname: '',
+        href: '/foo/bar/index.php#top',
+        origin: '',
+        password: '',
+        pathname: '/foo/bar/index.php',
+        port: '',
+        protocol: '',
+        search: '',
+        searchParams: {},
+        username: ''
+      }
+    );
+    equal(
+      Url.parse('www.google.com'),
+      {
+        hash: '',
+        host: 'www.google.com',
+        hostname: 'www.google.com',
+        href: 'www.google.com/',
+        origin: 'www.google.com',
+        password: '',
+        pathname: '/',
+        port: '',
+        protocol: '',
+        search: '',
+        searchParams: {},
+        username: ''
+      }
+    );
+    equal(
+      Url.parse('localhost:3000'),
+      {
+        hash: '',
+        host: 'localhost:3000',
+        hostname: 'localhost',
+        href: 'localhost:3000/',
+        origin: 'localhost:3000',
+        password: '',
+        pathname: '/',
+        port: '3000',
+        protocol: '',
+        search: '',
+        searchParams: {},
+        username: ''
+      }
+    );
+  });
+
+  it('should parse full URLs correctly', () => {
     equal(
       Url.parse('http://localhost:3000/test/index.php?id=36&a=b#top'),
       {
@@ -58,13 +168,11 @@ describe('Url.parse', () => {
       }
     );
     equal(
-      // eslint-disable-next-line max-len
       Url.parse('https://nodejs.org/api/http.html#http_http_request_url_options_callback'),
       {
         hash: '#http_http_request_url_options_callback',
         host: 'nodejs.org',
         hostname: 'nodejs.org',
-        // eslint-disable-next-line max-len
         href: 'https://nodejs.org/api/http.html#http_http_request_url_options_callback',
         origin: 'https://nodejs.org',
         password: '',
@@ -77,25 +185,29 @@ describe('Url.parse', () => {
       }
     );
     equal(
-      Url.parse('/?'),
+      Url.parse(
+        'https://www.reddit.com/r/pics/comments/haucpf' +
+        '/ive_found_a_few_funny_memories_during_lockdown/'
+      ),
       {
         hash: '',
-        host: '',
-        hostname: '',
-        href: '/?',
-        origin: '',
+        host: 'www.reddit.com',
+        hostname: 'www.reddit.com',
+        href: 'https://www.reddit.com/r/pics/comments/haucpf' +
+          '/ive_found_a_few_funny_memories_during_lockdown/',
+        origin: 'https://www.reddit.com',
         password: '',
-        pathname: '/',
+        pathname: '/r/pics/comments/haucpf/ive_found_a_few_funny_memories_during_lockdown/',
         port: '',
-        protocol: '',
-        search: '?',
+        protocol: 'https:',
+        search: '',
         searchParams: {},
         username: ''
       }
     );
   });
 
-  it('should decode percent-encoded characters', () => {
+  it('should decode percent-encoded characters correctly', () => {
     equal(
       Url.parse('http://test.com/?a%20b=my%20image.png'),
       {
@@ -126,6 +238,16 @@ describe('Url.stringifyQuery', () => {
     );
   });
 
+  it('should encode percent-encoded characters correctly', () => {
+    equal(
+      Url.stringifyQuery({
+        'a b': 'my image.png',
+        foo: 'test'
+      }),
+      'a%20b=my%20image.png&foo=test'
+    );
+  });
+
   it('should sort the query alphabetically', () => {
     equal(
       Url.stringifyQuery({
@@ -139,92 +261,137 @@ describe('Url.stringifyQuery', () => {
 });
 
 describe('Url.stringify', () => {
-  equal(
-    Url.stringify(),
-    '/'
-  );
-  equal(
-    Url.stringify(
-      Url.parse('http://a:b@localhost:3000/test/index.php?id=36&a=b#top')
-    ),
-    'http://a:b@localhost:3000/test/index.php?id=36&a=b#top'
-  );
-  equal(
-    Url.stringify({
-      href: 'https://example.com'
-    }),
-    'https://example.com'
-  );
-  equal(
-    Url.stringify({
-      hash: 'jumbotron',
-      hostname: 'example.com:8083',
-      password: 'doe',
-      port: 8081,
-      protocol: 'https',
-      searchParams: {
-        all: true,
-        updated_since: new Date('2000-01-01').valueOf()
-      },
-      username: 'john'
-    }),
-    'https://john:doe@example.com:8081' +
-    '/?all=true&updated_since=946684800000#jumbotron'
-  );
-  equal(
-    Url.stringify({
-      origin: 'https://example.com',
-      password: 'bar',
-      username: 'foo'
-    }),
-    'https://foo:bar@example.com/'
-  );
+  it('should return a single slash if the options are empty', () => {
+    equal(
+      Url.stringify(),
+      '/'
+    );
+    equal(
+      Url.stringify({}),
+      '/'
+    );
+  });
+
+  it('should stringify correctly', () => {
+    equal(
+      Url.stringify(
+        Url.parse('http://a:b@localhost:3000/test/index.php?id=36&a=b#top')
+      ),
+      'http://a:b@localhost:3000/test/index.php?id=36&a=b#top'
+    );
+    equal(
+      Url.stringify({
+        href: 'https://example.com'
+      }),
+      'https://example.com'
+    );
+    equal(
+      Url.stringify({
+        hash: 'jumbotron',
+        hostname: 'example.com:8083',
+        password: 'doe',
+        port: 8081,
+        protocol: 'https',
+        searchParams: {
+          all: true,
+          updated_since: new Date('2000-01-01').valueOf()
+        },
+        username: 'john'
+      }),
+      'https://john:doe@example.com:8081/?all=true&updated_since=946684800000#jumbotron'
+    );
+    equal(
+      Url.stringify({
+        origin: 'https://example.com',
+        password: 'bar',
+        username: 'foo'
+      }),
+      'https://foo:bar@example.com/'
+    );
+  });
 });
 
 describe('Url.split', () => {
-  equal(
-    Url.split('/'),
-    []
-  );
-  equal(
-    Url.split('/foo//bar/index.php'),
-    ['foo', '', 'bar', 'index.php']
-  );
-  equal(
-    Url.split('/foo//bar/index.php/'),
-    ['foo', '', 'bar', 'index.php']
-  );
-  equal(
-    Url.split('/api/User/[userId]'),
-    ['api', 'User', '[userId]']
-  );
-  equal(
-    Url.split('http://localhost:3000/test/index.php?id=36&a=b#top'),
-    ['http://localhost:3000', 'test', 'index.php?id=36&a=b#top']
-  );
+  it('should split empty URLs correctly', () => {
+    equal(
+      Url.split(),
+      []
+    );
+    equal(
+      Url.split(''),
+      []
+    );
+  });
+
+  it('should split paths correctly', () => {
+    equal(
+      Url.split('/'),
+      []
+    );
+    equal(
+      Url.split('/foo//bar/index.php'),
+      ['foo', '', 'bar', 'index.php']
+    );
+    equal(
+      Url.split('/foo//bar/index.php/'),
+      ['foo', '', 'bar', 'index.php']
+    );
+    equal(
+      Url.split('/api/User/[userId]'),
+      ['api', 'User', '[userId]']
+    );
+  });
+
+  it('should split full and partial URLs correctly', () => {
+    equal(
+      Url.split('www.example.com/index.php'),
+      ['www.example.com', 'index.php']
+    );
+    equal(
+      Url.split('localhost:3000/User//'),
+      ['localhost:3000', 'User', '']
+    );
+    equal(
+      Url.split('http://localhost:3000/test/index.php?id=36&a=b#top'),
+      ['http://localhost:3000', 'test', 'index.php?id=36&a=b#top']
+    );
+  });
 });
 
 describe('Url.join', () => {
-  equal(
-    Url.join('/foo//bar/index.php/', '/api/User/[userId]/'),
-    '/foo//bar/index.php/api/User/[userId]'
-  );
-  equal(
-    Url.join('http://test.com/foo//bar/index.php/', '/api/User/[userId]/'),
-    'http://test.com/foo//bar/index.php/api/User/[userId]'
-  );
-  equal(
-    Url.join('/foo//bar/index.php/', 'http://api/User/[userId]/'),
-    '/foo//bar/index.php/User/[userId]'
-  );
-  equal(
-    Url.join(
-      'http://a:b@localhost:3000/test/index.php?id=36&a=b#top',
-      'https://nodejs.org/api/http.html/#http_http_request_url_options_callback',
-      '/foo//bar/index.php/?foo=bar'
-    ),
-    'http://a:b@localhost:3000/test/index.php/api/http.html/foo//bar/index.php?foo=bar'
-  );
+  it('should join empty URLs correctly', () => {
+    equal(
+      Url.join(),
+      '/'
+    );
+    equal(
+      Url.join(''),
+      '/'
+    );
+  });
+
+  it('should join full and partial URLs correctly', () => {
+    equal(
+      Url.join('/foo//bar/index.php/', '/api/User/[userId]/'),
+      '/foo//bar/index.php/api/User/[userId]'
+    );
+    equal(
+      Url.join('http://test.com/foo//bar/index.php/', '/api/User/[userId]/'),
+      'http://test.com/foo//bar/index.php/api/User/[userId]'
+    );
+    equal(
+      Url.join('/foo//bar/index.php/', 'http://api/User/[userId]/'),
+      '/foo//bar/index.php/User/[userId]'
+    );
+    equal(
+      Url.join(
+        'http://a:b@localhost:3000/test/index.php?id=36&a=b#top',
+        'https://nodejs.org/api/http.html/#http_http_request_url_options_callback',
+        '/foo//bar/index.php/?foo=bar'
+      ),
+      'http://a:b@localhost:3000/test/index.php/api/http.html/foo//bar/index.php?foo=bar'
+    );
+  });
 });
 
 /**
@@ -282,6 +449,13 @@ describe('Url.normalize', () => {
     equal(
       Url.normalize('https://john:doe@example.com:443'),
       'https://john:doe@example.com/'
+    );
+  });
+
+  it('should respect all normalization rules at once', () => {
+    equal(
+      Url.normalize('HTTPS://User@Example.COM:443/%7Efoo%2a/./bar/baz/../qux'),
+      'https://User@example.com/~foo%2A/bar/qux'
     );
   });
 });
