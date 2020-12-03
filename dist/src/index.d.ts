@@ -3,10 +3,12 @@
  */
 export class Url {
     /**
-     * @param {string} path
+     * @param {string} url
      * @return {string}
+     * @see https://en.wikipedia.org/wiki/URI_normalization#Normalizations_that_preserve_semantics
+     * @see https://tools.ietf.org/html/rfc3986
      */
-    static normalizePath(path: string): string;
+    static normalize(url: string): string;
     /**
      * @param {string} url
      * @return {UrlSchema}
@@ -25,10 +27,13 @@ export class Url {
      * @param {string} path
      * @return {string[]}
      * @example
-     * Url.splitPath('/foo//bar/index.php/');
+     * Url.split('/foo//bar/index.php/');
      * // ['foo', '', 'bar', 'index.php']
+     *
+     * Url.split('http://localhost:3000/test/index.php?id=36&a=b#top');
+     * // ['http://localhost:3000', 'test', 'index.php']
      */
-    static splitPath(path: string): string[];
+    static split(path: string): string[];
     /**
      * @param {Partial<UrlSchema>} [options]
      * @return {string}

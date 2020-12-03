@@ -3,19 +3,92 @@
  * @typedef {import('./types').Query} Query
  */
 
+const PERCENT_ENCODED_TRIPLETS_REGEXP = /%[A-Za-z0-9]{2}/g;
 const SPLIT_PATH_REGEXP = /^\/?(.*?)\/?$/;
-const URL_RGX = /^(?:([^:]+:)\/\/)?(?:([^:]+):([^@]+)@)?([^:/?#]+)?(?::([^/?#]+))?(\/[^?#]*)?(\?[^#]*)?(#.*)?$/;
+/**
+ * @see https://tools.ietf.org/html/rfc3986#section-2.3
+ */
+const UNRESERVED_CHARACTER_REGEXP = /[A-Za-z0-9-._~]/;
+const URL_REGEXP = /^(?:([^:]*:)\/\/)?(?:([^:]*)(?::([^@]*))?@)?([^:/?#]*)?(?::([^/?#]*))?(\/[^?#]*)?(\?[^#]*)?(#.*)?$/;
 
 /**
  * Utility class for handling URLs.
  */
 export class Url {
   /**
-   * @param {string} path
+   * @param {string} url
    * @return {string}
+   * @see https://en.wikipedia.org/wiki/URI_normalization#Normalizations_that_preserve_semantics
+   * @see https://tools.ietf.org/html/rfc3986
    */
-  static normalizePath(path) {
-    return '/' + this.splitPath(path).join('/');
+  static normalize(url) {
+    const parsedUrl = this.parse(url);
+    let {
+      hash,
+      hostname,
+      password,
+      pathname,
+      port,
+      protocol,
+      search,
+      searchParams,
+      username
+    } = parsedUrl;
+
+    // Convert the scheme and host to lowercase:
+    protocol = protocol.toLowerCase();
+    hostname = hostname.toLowerCase();
+
+    // Remove the default port:
+    if ((protocol === 'http:' && port === '80') || (protocol === 'https:' && port === '443')) {
+      port = '';
+    }
+
+    // Remove dot-segments:
+    if (pathname?.length > 1) {
+      const tokens = this.split(pathname);
+      /** @type {string[]} */
+      const newTokens = [];
+
+      for (let i = 0; i < tokens.length; i++) {
+        switch (tokens[i]) {
+          case '.':
+            break;
+          case '..':
+            newTokens.pop();
+            break;
+          default:
+            newTokens.push(tokens[i]);
+            break;
+        }
+      }
+
+      pathname = '/' + newTokens.join('/');
+    }
+
+    let newUrl = this.stringify({
+      hash,
+      hostname,
+      password,
+      pathname,
+      port,
+      protocol,
+      search,
+      searchParams,
+      username
+    });
+
+    newUrl = newUrl.replace(PERCENT_ENCODED_TRIPLETS_REGEXP, (match) => {
+      const decodedCharacter = decodeURIComponent(match);
+
+      return UNRESERVED_CHARACTER_REGEXP.test(decodedCharacter)
+        // Decode percent-encoded triplets of unreserved characters:
+        ? decodedCharacter
+        // Convert percent-encoded triplets to uppercase:
+        : match.toUpperCase();
+    });
+
+    return newUrl;
   }
 
   /**
@@ -23,7 +96,7 @@ export class Url {
    * @return {UrlSchema}
    */
   static parse(url) {
-    const match = url.match(URL_RGX) ?? [];
+    const match = url.match(URL_REGEXP) ?? [];
     const protocol = match[1] || '';
     const username = match[2] || '';
     const password = match[3] || '';
@@ -35,7 +108,7 @@ export class Url {
     const host = `${hostname}${port ? `:${port}` : ''}`;
     const scheme = protocol ? `${protocol}//` : '';
     const origin = `${scheme}${host}`;
-    const userinfo = username ? `${username}:${password}@` : '';
+    const userinfo = username ? `${username}${password ? `:${password}` : ''}@` : '';
     const href = `${scheme}${userinfo}${host}${pathname}${search}${hash}`;
     const searchParams = this.parseQuery(search);
 
@@ -83,12 +156,30 @@ export class Url {
    * @param {string} path
    * @return {string[]}
    * @example
-   * Url.splitPath('/foo//bar/index.php/');
+   * Url.split('/foo//bar/index.php/');
    * // ['foo', '', 'bar', 'index.php']
+   *
+   * Url.split('http://localhost:3000/test/index.php?id=36&a=b#top');
+   * // ['http://localhost:3000', 'test', 'index.php']
    */
-  static splitPath(path) {
-    const match = path.match(SPLIT_PATH_REGEXP);
-    return match?.[1].split('/') ?? [];
+  static split(path) {
+    const tokens = [];
+    const { hash, origin, pathname, search } = this.parse(path);
+
+    if (origin) {
+      tokens.push(origin);
+    }
+
+    if (pathname) {
+      const match = (pathname + search + hash).match(SPLIT_PATH_REGEXP);
+      const tailTokens = match?.[1].split('/');
+
+      if (tailTokens) {
+        tokens.push(...tailTokens);
+      }
+    }
+
+    return tokens;
   }
 
   /**
@@ -149,8 +240,8 @@ export class Url {
       host = tokens[1] || '';
     }
 
-    const userinfo = username || password
-      ? `${username}:${password}@`
+    const userinfo = username
+      ? `${username}${password ? `:${password}` : ''}@`
       : '';
     const hashString = hash
       ? `#${hash}`

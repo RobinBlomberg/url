@@ -41,6 +41,23 @@ describe('Url.parse', () => {
       }
     );
     equal(
+      Url.parse('ftp://username@mysite.co.uk'),
+      {
+        hash: '',
+        host: 'mysite.co.uk',
+        hostname: 'mysite.co.uk',
+        href: 'ftp://username@mysite.co.uk/',
+        origin: 'ftp://mysite.co.uk',
+        password: '',
+        pathname: '/',
+        port: '',
+        protocol: 'ftp:',
+        search: '',
+        searchParams: {},
+        username: 'username'
+      }
+    );
+    equal(
       // eslint-disable-next-line max-len
       Url.parse('https://nodejs.org/api/http.html#http_http_request_url_options_callback'),
       {
@@ -164,24 +181,84 @@ describe('Url.stringify', () => {
   );
 });
 
-describe('Url.splitPath', () => {
+describe('Url.split', () => {
   equal(
-    Url.splitPath('/'),
+    Url.split('/'),
     []
   );
   equal(
-    Url.splitPath('/foo//bar/index.php/'),
+    Url.split('/foo//bar/index.php'),
     ['foo', '', 'bar', 'index.php']
   );
   equal(
-    Url.splitPath('/api/User/[userId]'),
+    Url.split('/foo//bar/index.php/'),
+    ['foo', '', 'bar', 'index.php']
+  );
+  equal(
+    Url.split('/api/User/[userId]'),
     ['api', 'User', '[userId]']
+  );
+  equal(
+    Url.split('http://localhost:3000/test/index.php?id=36&a=b#top'),
+    ['http://localhost:3000', 'test', 'index.php?id=36&a=b#top']
   );
 });
 
-describe('Url.normalizePath', () => {
-  equal(
-    Url.normalizePath('/foo//bar/index.php/'),
-    '/foo//bar/index.php'
-  );
+/**
+ * @see https://en.wikipedia.org/wiki/URI_normalization#Normalizations_that_preserve_semantics
+ * @see https://tools.ietf.org/html/rfc3986
+ */
+describe('Url.normalize', () => {
+  it('should convert percent-encoded triplets to uppercase', () => {
+    equal(
+      Url.normalize('http://example.com/foo%2a'),
+      'http://example.com/foo%2A'
+    );
+  });
+
+  it('should convert the scheme and host to lowercase', () => {
+    equal(
+      Url.normalize('HTTP://User@Example.COM/Foo'),
+      'http://User@example.com/Foo'
+    );
+  });
+
+  it('should decode percent-encoded triplets of unreserved characters', () => {
+    equal(
+      Url.normalize('http://example.com/%7Efoo'),
+      'http://example.com/~foo'
+    );
+  });
+
+  it('should remove dot-segments', () => {
+    equal(
+      Url.normalize('http://example.com/foo/./bar/baz/../qux'),
+      'http://example.com/foo/bar/qux'
+    );
+  });
+
+  it('should convert an empty path to a "/" path', () => {
+    equal(
+      Url.normalize('http://example.com'),
+      'http://example.com/'
+    );
+  });
+
+  it('should NOT add a trailing "/" to a non-empty path', () => {
+    equal(
+      Url.normalize('http://example.com/foo'),
+      'http://example.com/foo'
+    );
+  });
+
+  it('should remove the default port', () => {
+    equal(
+      Url.normalize('http://example.com:80'),
+      'http://example.com/'
+    );
+    equal(
+      Url.normalize('https://john:doe@example.com:443'),
+      'https://john:doe@example.com/'
+    );
+  });
 });
