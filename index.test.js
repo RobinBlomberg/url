@@ -1,5 +1,5 @@
 import { describe, equal, it } from '@robinblomberg/test';
-import { Url } from './src/index.js';
+import { Url } from './lib/index.js';
 
 describe('Url.parseQuery', () => {
   it('should skip a leading question mark', () => {

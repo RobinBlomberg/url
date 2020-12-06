@@ -1,1 +1,1 @@
-export { Url } from './src/index.js';
+export { Url } from './lib/index.js';
