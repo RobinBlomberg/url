@@ -431,7 +431,7 @@ test('@robinblomberg/url', () => {
 
       it('should convert an empty path to a "/" path', () => {
         equal(
-          Url.normalize('http://example.zcom'),
+          Url.normalize('http://example.com'),
           'http://example.com/'
         );
       });

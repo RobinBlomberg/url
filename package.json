@@ -1,6 +1,6 @@
 {
   "name": "@robinblomberg/url",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "author": "Robin Blomberg",
   "type": "module",
   "main": "lib/index.js",
@@ -19,7 +19,7 @@
     "dev": "nodemon --watch . --exec \"concurrently \\\"npm run --silent test\\\" \\\"npm run --silent check\\\"\"",
     "lint": "eslint **/*.{js,ts}",
     "lint:fix": "eslint **/*.{js,ts} --fix",
-    "test": "node ./test/index.test.js"
+    "test": "node --unhandled-rejections=strict ./test/index.test.js"
   },
   "husky": {
     "hooks": {
